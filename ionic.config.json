@@ -1,0 +1,7 @@
+{
+  "name": "Exercise Daily",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
