@@ -1,0 +1,269 @@
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+ion-toolbar {
+  --background: var(--ion-toolbar-background);
+  --color: var(--ion-text-color);
+}
+
+.sign-out-icon {
+  color: #ff6b6b;
+}
+
+.home-container {
+  min-height: 100%;
+  padding: 16px;
+}
+
+.content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+
+  ion-spinner {
+    transform: scale(1.5);
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #888;
+    margin-top: 16px;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  margin-top: 20vh;
+
+  .empty-icon {
+    font-size: 80px;
+    color: var(--ion-color-primary);
+    margin-bottom: 24px;
+    opacity: 0.8;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    color: #888;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 0.9rem;
+
+    ion-icon {
+      vertical-align: middle;
+      font-size: 20px;
+    }
+  }
+}
+
+/* Exercise Card */
+.exercises-card {
+  background: var(--ion-card-background);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  body.dark & {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--ion-text-color);
+  }
+
+  .exercise-count {
+    background: var(--ion-color-primary);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+/* Exercise List Styling */
+.exercise-list {
+  background: transparent;
+  padding: 0;
+}
+
+ion-item-sliding {
+  margin-bottom: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.exercise-item {
+  --background: var(--ion-item-background);
+  --border-color: var(--ion-color-step-150);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --min-height: 80px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  body.dark & {
+    --border-color: var(--ion-color-step-100);
+  }
+
+  &:hover {
+    --background: var(--ion-color-step-50);
+    transform: translateX(4px);
+  }
+}
+
+.exercise-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.exercise-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .location-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+  }
+
+  .exercise-type {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+  }
+}
+
+.exercise-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 28px;
+
+  .duration {
+    font-size: 0.95rem;
+    color: #888;
+  }
+
+  .time {
+    font-size: 0.9rem;
+    color: #888;
+    font-weight: 500;
+  }
+}
+
+/* Delete Button Styling */
+ion-item-options {
+  border: none;
+}
+
+ion-item-option {
+  --background: #ff6b6b;
+  --color: #ffffff;
+  font-weight: 600;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-step-100);
+
+  body.dark & {
+    border-top: 1px solid var(--ion-color-step-50);
+  }
+
+  .page-info {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: center;
+    color: var(--ion-text-color);
+  }
+
+  ion-button {
+    --color: var(--ion-text-color);
+
+    &[disabled] {
+      opacity: 0.3;
+    }
+  }
+}
+
+/* FAB Button */
+ion-fab-button {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+  --box-shadow: 0 4px 16px rgba(5, 144, 51, 0.4);
+
+  &:hover {
+    --box-shadow: 0 6px 20px rgba(5, 144, 51, 0.6);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .exercises-card {
+    padding: 16px;
+  }
+
+  .card-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .exercise-type {
+    font-size: 1rem !important;
+  }
+
+  .exercise-details {
+    font-size: 0.85rem;
+  }
+}

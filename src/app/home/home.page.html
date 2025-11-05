@@ -1,17 +1,102 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 1
+      {{ currentUser ? 'Hello, ' + currentUser.username : 'Home' }}
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleTheme()">
+        <ion-icon [name]="isDarkMode ? 'sunny' : 'moon'" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="signOut()">
+        <ion-icon name="log-out-outline" slot="icon-only" class="sign-out-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <div class="home-container">
+
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Loading your exercises...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="content-wrapper">
+
+      <!-- Empty State -->
+      <div *ngIf="todaysExercises.length === 0" class="empty-state">
+        <ion-icon name="barbell-outline" class="empty-icon"></ion-icon>
+        <h2>No Exercises Logged</h2>
+        <p>You haven't logged any exercises today.</p>
+        <p class="hint">Tap the <ion-icon name="add-circle" color="primary"></ion-icon> button below to get started!</p>
+      </div>
+
+      <!-- Exercise List with Swipe-to-Delete -->
+      <div *ngIf="todaysExercises.length > 0" class="exercises-card">
+        <div class="card-header">
+          <h2>Today's Exercises</h2>
+          <span class="exercise-count">{{ todaysExercises.length }} {{ todaysExercises.length === 1 ? 'exercise' : 'exercises' }}</span>
+        </div>
+
+        <ion-list class="exercise-list">
+          <ion-item-sliding *ngFor="let ex of paginatedExercises">
+            <ion-item (click)="openExerciseModal(ex)" class="exercise-item" lines="full">
+              <div class="exercise-content">
+                <div class="exercise-header">
+                  <ion-icon
+                    [name]="ex.exerciseLocation === 'inside' ? 'home' : 'sunny'"
+                    class="location-icon">
+                  </ion-icon>
+                  <span class="exercise-type">{{ ex.exerciseType || 'N/A' }}</span>
+                </div>
+                <div class="exercise-details">
+                  <span class="duration">{{ ex.exerciseDuration || 'N/A' }}</span>
+                  <span class="time">{{ ex.dateTime ? (ex.dateTime | date: 'shortTime') : 'N/A' }}</span>
+                </div>
+              </div>
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="deleteExercise(ex)">
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-list>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" *ngIf="totalPages > 1">
+          <ion-button
+            fill="clear"
+            size="small"
+            [disabled]="currentPage === 1"
+            (click)="previousPage()">
+            <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+          </ion-button>
+
+          <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+
+          <ion-button
+            fill="clear"
+            size="small"
+            [disabled]="currentPage === totalPages"
+            (click)="nextPage()">
+            <ion-icon name="chevron-forward" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="openExerciseModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
 </ion-content>

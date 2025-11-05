@@ -1,17 +1,110 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Exercise History</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleTheme()">
+        <ion-icon [name]="isDarkMode ? 'sunny' : 'moon'" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="signOut()">
+        <ion-icon name="log-out-outline" slot="icon-only" class="sign-out-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <div class="history-container">
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Loading your history...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="content-wrapper">
+      <!-- Empty State -->
+      <div *ngIf="historyExercises.length === 0" class="empty-state">
+        <ion-icon name="archive-outline" class="empty-icon"></ion-icon>
+        <h2>No History Found</h2>
+        <p>You have no saved exercise history.</p>
+        <p class="hint">Go to the <strong>Home</strong> tab to log new exercises!</p>
+      </div>
+
+      <!-- History Table -->
+      <div *ngIf="historyExercises.length > 0" class="history-card">
+        <div class="card-header">
+          <h2>Past Exercises</h2>
+          <div class="header-actions">
+            <span class="exercise-count">{{ historyExercises.length }} {{ historyExercises.length === 1 ? 'record' : 'records' }}</span>
+            <ion-button fill="solid" color="primary" (click)="openStatsModal()">
+              <ion-icon name="stats-chart" slot="start"></ion-icon>
+              Report
+            </ion-button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+            <tr>
+              <th>Exercise</th>
+              <th class="sortable-header" (click)="sortBy('duration')">
+                <div class="header-content">
+                  <span>Duration</span>
+                  <ion-icon [name]="getSortIcon('duration')" [class.active]="sortColumn === 'duration'"></ion-icon>
+                </div>
+              </th>
+              <th>Location</th>
+              <th class="sortable-header" (click)="sortBy('date')">
+                <div class="header-content">
+                  <span>Date</span>
+                  <ion-icon [name]="getSortIcon('date')" [class.active]="sortColumn === 'date'"></ion-icon>
+                </div>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let ex of paginatedExercises" class="table-row">
+              <td class="exercise-cell">
+                <span class="exercise-name">{{ ex.exerciseType || 'N/A' }}</span>
+              </td>
+              <td class="duration-cell">{{ ex.exerciseDuration || 'N/A' }}</td>
+              <td class="location-cell">
+                <ion-icon
+                  [name]="ex.exerciseLocation === 'inside' ? 'home' : 'sunny'"
+                  class="location-icon">
+                </ion-icon>
+                <span>{{ ex.exerciseLocation | titlecase }}</span>
+              </td>
+              <td class="time-cell">{{ ex.dateTime ? (ex.dateTime | date: 'MMM d, y, h:mm a') : 'N/A' }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" *ngIf="totalPages > 1">
+          <ion-button
+            fill="clear"
+            size="small"
+            [disabled]="currentPage === 1"
+            (click)="previousPage()">
+            <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+          </ion-button>
+
+          <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+
+          <ion-button
+            fill="clear"
+            size="small"
+            [disabled]="currentPage === totalPages"
+            (click)="nextPage()">
+            <ion-icon name="chevron-forward" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>

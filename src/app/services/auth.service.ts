@@ -1,114 +1,139 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { Storage } from '@ionic/storage-angular'; // Ionic's secure storage
-import { Device } from '@capacitor/device'; // Capacitor plugin to get UUID
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { Platform } from '@ionic/angular';
+import { Storage } from '@ionic/storage-angular';
+import { firstValueFrom, BehaviorSubject, from } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { AppUser } from '../models/user.model';
+import { Device } from '@capacitor/device';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
   private http = inject(HttpClient);
-  private ionicStorage = inject(Storage);
+  private storage = inject(Storage);
+  private platform = inject(Platform);
+  private router = inject(Router);
 
-  private API_URL = 'http://localhost:8080/api/users';
+  // This still points to /api/users, which is correct
+  private apiUrl = `${environment.apiUrl}/api/users`;
 
-  private currentUser: any = null;
-  private storage: Storage | null = null;
+  private currentUser = new BehaviorSubject<AppUser | null>(null);
 
   constructor() {
     this.initStorage();
   }
 
   async initStorage() {
-    this.storage = await this.ionicStorage.create();
+    await this.storage.create();
+  }
+
+  getCurrentUser() {
+    return this.currentUser.asObservable();
+  }
+
+  async getStoredUser(): Promise<AppUser | null> {
+    const user = await this.storage.get('app_user');
+    return user ? JSON.parse(user) : null;
   }
 
   /**
-   * 1. The main "login with password" function.
+   * Logs in with the "loginIdentifier" (username OR email).
    */
-  async loginWithPassword(username: string, password: string): Promise<any> {
-    const deviceId = await Device.getId();
+  async loginWithPassword(loginIdentifier: string, password: string, rememberMe: boolean): Promise<AppUser> {
+    const endpoint = `${this.apiUrl}/login`;
 
-    const loginRequest = {
-      username: username,
-      password: password,
-      deviceUuid: deviceId.identifier
+    // The DTO now expects 'loginIdentifier'
+    const payload: any = {
+      loginIdentifier: loginIdentifier,
+      password: password
     };
 
-    return this.http.post(`${this.API_URL}/login`, loginRequest).pipe(
-      tap((user: any) => this.storeUser(user))
-    ).toPromise();
-  }
-
-  /**
-   * 2. The automatic "login with UUID" function.
-   */
-  async loginWithUuid(): Promise<any> {
-    const deviceId = await Device.getId();
-
-    const loginRequest = {
-      deviceUuid: deviceId.identifier
-    };
-
-    return this.http.post(`${this.API_URL}/login-uuid`, loginRequest, {
-      headers: { 'Content-Type': 'application/json' }
-    }).pipe(
-      tap((user: any) => this.storeUser(user))
-    ).toPromise().catch(err => {
-      // 401 is expected on first launch - device not registered yet
-      if (err.status === 401) {
-        return null;
-      }
-      // Only log/throw for unexpected errors (500, network issues, etc.)
-      console.error('UUID login error:', err);
-      throw err;
-    });
-  }
-
-  /**
-   * 3. The "register" function.
-   */
-  async register(username: string, password: string, email: string): Promise<any> {
-    const deviceId = await Device.getId();
-
-    const registerRequest = {
-      username: username,
-      password: password,
-      email: email,
-      deviceUuid: deviceId.identifier
-    };
-
-    return this.http.post(`${this.API_URL}/register`, registerRequest).pipe(
-      tap((user: any) => this.storeUser(user))
-    ).toPromise();
-  }
-
-  // --- Helper Functions ---
-
-  private async storeUser(user: any) {
-    this.currentUser = user;
-    await this.storage?.set('currentUser', user);
-  }
-
-  public getCurrentUser(): any {
-    return this.currentUser;
-  }
-
-  public async getStoredUser(): Promise<any> {
-    if (!this.storage) await this.initStorage();
-    const user = await this.storage?.get('currentUser');
-    if (user) {
-      this.currentUser = user;
+    if (rememberMe) {
+      const deviceId = await Device.getId();
+      payload.deviceUuid = deviceId.identifier;
     }
+
+    const user = await firstValueFrom(
+      this.http.post<AppUser>(endpoint, payload)
+    );
+
+    await this.storeUserAndNotify(user);
     return user;
   }
 
-  public async logout() {
-    this.currentUser = null;
-    await this.storage?.remove('currentUser');
+  /**
+   * Registers with the fields from the doc.
+   */
+  async register(payload: any): Promise<AppUser> {
+    const endpoint = `${this.apiUrl}/register`;
+
+    const deviceId = await Device.getId();
+
+    // The DTO for register is unchanged
+    const dataToSend = {
+      username: payload.username,
+      password: payload.password,
+      email: payload.email,
+      deviceUuid: deviceId.identifier
+    };
+
+    const user = await firstValueFrom(
+      this.http.post<AppUser>(endpoint, dataToSend)
+    );
+
+    await this.storeUserAndNotify(user);
+    return user;
+  }
+
+  /**
+   * loginWithUuid is unchanged and correct.
+   */
+  async loginWithUuid(): Promise<AppUser | null> {
+    if (!this.platform.is('capacitor')) {
+      return null;
+    }
+
+    const deviceId = await Device.getId();
+
+    const endpoint = `${this.apiUrl}/login-uuid`;
+    const payload = {
+      deviceUuid: deviceId.identifier
+    };
+
+    try {
+      const user = await firstValueFrom(
+        this.http.post<AppUser>(endpoint, payload)
+      );
+
+      await this.storeUserAndNotify(user);
+      return user;
+
+    } catch (err) {
+      console.warn('UUID login failed', err);
+      return null;
+    }
+  }
+
+  getToken() {
+    return from(this.storage.get('auth_token'));
+  }
+
+  async logout() {
+    await this.storage.remove('app_user');
+    await this.storage.remove('auth_token');
+    this.currentUser.next(null);
+    this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+
+  private async storeUserAndNotify(user: AppUser) {
+    await this.storage.set('app_user', JSON.stringify(user));
+    // This is from our interceptor setup, it's critical
+    if (user.token) {
+      await this.storage.set('auth_token', user.token);
+    }
+    this.currentUser.next(user);
   }
 }
-

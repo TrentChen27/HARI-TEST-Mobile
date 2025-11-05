@@ -1,36 +1,67 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>
-      {{ isRegistering ? 'Create Account' : 'Welcome' }}
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
+<ion-content>
   <div class="login-container">
-    <ion-icon name="fitness" color="primary" class="login-icon"></ion-icon>
-    <ion-text color="primary">
-      <h1>Exercise Tracker</h1>
-    </ion-text>
+    <!-- Back button positioned absolutely if registering -->
+    <ion-button
+      *ngIf="isRegistering"
+      fill="clear"
+      class="back-button"
+      (click)="toggleForm(false)">
+      <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+    </ion-button>
 
-    <!-- Use our Reactive Form group -->
+    <ion-icon name="fitness" class="login-icon"></ion-icon>
+
+    <div class="title">{{ isRegistering ? 'Get Started' : 'Welcome Back!' }}</div>
+    <div class="subtitle">
+      {{ isRegistering ? 'Create your account to start' : 'Sign in to continue your journey' }}
+    </div>
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-      <!-- Username Input -->
-      <ion-item>
-        <ion-input
-          label="Username"
-          labelPlacement="floating"
-          formControlName="username"
-          [required]="true"
-          autocomplete="username"
-        ></ion-input>
-      </ion-item>
-      <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-message">
-        Username is required.
+      <div *ngIf="!isRegistering">
+        <ion-item>
+          <ion-input
+            label="Username or Email"
+            labelPlacement="floating"
+            formControlName="loginIdentifier"
+            [required]="true"
+            autocomplete="username"
+          ></ion-input>
+        </ion-item>
+        <div *ngIf="loginForm.get('loginIdentifier')?.invalid && loginForm.get('loginIdentifier')?.touched" class="error-message">
+          Username or Email is required.
+        </div>
       </div>
 
-      <!-- Password Input -->
+      <div *ngIf="isRegistering">
+        <ion-item>
+          <ion-input
+            label="Username"
+            labelPlacement="floating"
+            formControlName="username"
+            [required]="true"
+            autocomplete="username"
+          ></ion-input>
+        </ion-item>
+        <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-message">
+          Username is required (min 3 chars).
+        </div>
+
+        <ion-item>
+          <ion-input
+            label="Email"
+            labelPlacement="floating"
+            formControlName="email"
+            type="email"
+            [required]="true"
+            autocomplete="email"
+          ></ion-input>
+        </ion-item>
+        <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+          A valid email is required.
+        </div>
+      </div>
+
       <ion-item>
         <ion-input
           label="Password"
@@ -45,33 +76,46 @@
         Password must be at least 6 characters.
       </div>
 
-      <!-- Email Input (only shown for registration) -->
-      <ion-item *ngIf="isRegistering">
-        <ion-input
-          label="Email"
-          labelPlacement="floating"
-          formControlName="email"
-          type="email"
-          [required]="true"
-        ></ion-input>
-      </ion-item>
-      <div *ngIf="isRegistering && loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
-        A valid email is required.
+      <div *ngIf="isRegistering">
+        <ion-item>
+          <ion-input
+            label="Confirm Password"
+            labelPlacement="floating"
+            formControlName="passwordConfirm"
+            type="password"
+            [required]="true"
+          ></ion-input>
+        </ion-item>
+        <div *ngIf="loginForm.hasError('passwordMismatch') && loginForm.get('passwordConfirm')?.touched" class="error-message">
+          Passwords do not match.
+        </div>
       </div>
 
-      <!-- Main Submit Button -->
+      <div *ngIf="!isRegistering" class="form-helpers">
+        <ion-item lines="none" class="ion-no-padding" style="--background: transparent; margin-bottom: 0;">
+          <ion-checkbox slot="start" formControlName="rememberMe"></ion-checkbox>
+          <ion-label>Remember me</ion-label>
+        </ion-item>
+<!--        <a href="#" class="forgot-link">Forgot Password?</a>-->
+      </div>
+
       <ion-button
         type="submit"
         expand="block"
         class="ion-margin-top"
         [disabled]="loginForm.invalid">
-        {{ isRegistering ? 'Register' : 'Login' }}
+        {{ isRegistering ? 'Create Account' : 'Sign In' }}
       </ion-button>
     </form>
 
-    <!-- Toggle Button -->
-    <ion-button fill="clear" expand="block" (click)="toggleForm()">
-      {{ isRegistering ? 'Already have an account? Login' : 'Need an account? Register' }}
-    </ion-button>
+    <div class="toggle-link">
+      <span *ngIf="!isRegistering">
+        Don't have an account? <strong (click)="toggleForm(true)">Sign up</strong>
+      </span>
+      <span *ngIf="isRegistering">
+        Already have an account? <strong (click)="toggleForm(false)">Sign in</strong>
+      </span>
+    </div>
+
   </div>
 </ion-content>

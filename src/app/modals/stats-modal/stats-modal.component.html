@@ -1,0 +1,85 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>7-Day Exercise Report</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Loading your report...</p>
+  </div>
+
+  <!-- Report Content -->
+  <div *ngIf="!isLoading && reportData" class="stats-container">
+    <!-- Date Range Header -->
+    <div class="date-range-header">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>{{ formattedDateRange }}</span>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+      <div class="stat-card primary-stat">
+        <ion-icon name="barbell" class="stat-icon"></ion-icon>
+        <div class="stat-content">
+          <h3>Total Exercises</h3>
+          <p class="stat-value">{{ reportData.totalExercises }}</p>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="stat-card primary-stat">
+        <ion-icon name="time" class="stat-icon"></ion-icon>
+        <div class="stat-content">
+          <h3>Total Duration</h3>
+          <p class="stat-value">{{ formattedDuration }}</p>
+          <span class="stat-label">Time spent exercising</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="stats-breakdown">
+      <div class="breakdown-item">
+        <div class="breakdown-label">
+          <ion-icon name="calendar-number-outline" color="primary"></ion-icon>
+          <span>Days tracked</span>
+        </div>
+        <div class="breakdown-value">7 days</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">
+          <ion-icon name="trending-up-outline" color="primary"></ion-icon>
+          <span>Average per day</span>
+        </div>
+        <div class="breakdown-value">
+          {{ (reportData.totalExercises / 7).toFixed(1) }} exercises
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">
+          <ion-icon name="timer-outline" color="primary"></ion-icon>
+          <span>Avg. duration per day</span>
+        </div>
+        <div class="breakdown-value">
+          {{ (reportData.totalMinutes / 7).toFixed(0) }} min
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Footer -->
+    <div class="report-footer">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <p>This report shows your exercise activity from {{ reportData.startDate }} to {{ reportData.endDate }}</p>
+    </div>
+  </div>
+</ion-content>

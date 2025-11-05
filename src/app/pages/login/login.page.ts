@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {LoadingController, ToastController} from '@ionic/angular';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { LoadingController, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +12,7 @@ import {LoadingController, ToastController} from '@ionic/angular';
 })
 export class LoginPage implements OnInit {
 
-  // Use inject() for modern, clean DI
+  // --- Injected Services ---
   private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
@@ -24,95 +24,139 @@ export class LoginPage implements OnInit {
 
   constructor() {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      // --- Login-Only Fields ---
+      loginIdentifier: [''],
+      rememberMe: [false],
+
+      // --- Common Field ---
       password: ['', [Validators.required, Validators.minLength(6)]],
-      email: ['', [Validators.email]]
-    });
+
+      // --- Register-Only Fields (Optional) ---
+      firstName: [''], // No validator
+      lastName: [''],  // No validator
+
+      // --- Register-Only Fields (Required) ---
+      username: [''],
+      email: [''],
+      passwordConfirm: ['']
+    }, { validators: this.passwordMatchValidator });
   }
 
   ngOnInit() {
-    // When the page loads, try to auto-login
-    console.log('LoginPage ngOnInit called');
+    // Set initial form state to LOGIN
+    this.toggleForm(false);
+
     this.tryAutoLogin();
   }
 
   async tryAutoLogin() {
     console.log('tryAutoLogin started');
-    const loading = await this.loadingCtrl.create({ message: 'Logging in...' });
+    const loading = await this.loadingCtrl.create({ message: 'Checking for stored login...' });
     await loading.present();
-
     try {
       const user = await this.authService.loginWithUuid();
       if (user) {
+        // Update the existing loading message instead of creating a new loader
+        loading.message = 'Welcome back! Logging in...';
+        // small pause to ensure message updates visually
+        await new Promise(res => setTimeout(res, 200));
         // SUCCESS: UUID login worked! Go to the main app.
-        this.router.navigateByUrl('/tabs/home');
+        await this.router.navigateByUrl('/tabs/home');
       }
-      // If no user, do nothing. Just stay on the login page.
+      // If no user, stay on the login page.
     } catch (error) {
-      // Error (e.g., 404, 500), just stay on login page.
       console.warn('No stored UUID login found.');
     } finally {
-      loading.dismiss();
+      await loading.dismiss();
     }
   }
 
-  // Called when the user clicks the "Login" or "Register" button
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    if (control.get('email')?.validator) { // Checks if we are in register mode
+      const password = control.get('password');
+      const passwordConfirm = control.get('passwordConfirm');
+
+      if (password && passwordConfirm && password.value !== passwordConfirm.value) {
+        return { passwordMismatch: true };
+      }
+    }
+    return null;
+  }
+
+  toggleForm(forceState?: boolean) {
+    this.isRegistering = (forceState !== undefined) ? forceState : !this.isRegistering;
+
+    const loginControl = this.loginForm.get('loginIdentifier');
+    const rememberMeControl = this.loginForm.get('rememberMe');
+    const regControls = {
+      username: this.loginForm.get('username'),
+      email: this.loginForm.get('email'),
+      passwordConfirm: this.loginForm.get('passwordConfirm')
+    };
+
+    if (this.isRegistering) {
+      // --- SET UP FOR REGISTER ---
+      loginControl?.clearValidators();
+      rememberMeControl?.clearValidators();
+      rememberMeControl?.setValue(false);
+
+      regControls.username?.setValidators([Validators.required, Validators.minLength(3)]);
+      regControls.email?.setValidators([Validators.required, Validators.email]);
+      regControls.passwordConfirm?.setValidators([Validators.required]);
+
+    } else {
+      // --- SET UP FOR LOGIN ---
+      loginControl?.setValidators([Validators.required]);
+      rememberMeControl?.setValue(true);
+
+      for (const key in regControls) {
+        regControls[key as keyof typeof regControls]?.clearValidators();
+      }
+    }
+
+    this.loginForm.reset({ rememberMe: rememberMeControl?.value });
+    this.loginForm.updateValueAndValidity();
+  }
+
   async onSubmit() {
     if (this.loginForm.invalid) {
-      return; // Form is not valid, do nothing
+      this.loginForm.markAllAsTouched();
+      this.showToast('Please check the form for errors.');
+      return;
     }
 
     const loading = await this.loadingCtrl.create({ message: 'Please wait...' });
     await loading.present();
 
-    // Get values from the form
-    const { username, password, email } = this.loginForm.value;
+    const { loginIdentifier, username, password, email, rememberMe } = this.loginForm.value;
 
     try {
       if (this.isRegistering) {
         // --- REGISTER FLOW ---
-        if (!this.loginForm.get('email')?.valid) {
-          this.showToast('Please provide a valid email to register.');
-          loading.dismiss();
-          return;
-        }
-        await this.authService.register(username, password, email);
+        // Backend DTO needs username, password, email
+        await this.authService.register({ username, password, email });
       } else {
         // --- LOGIN FLOW ---
-        await this.authService.loginWithPassword(username, password);
+        // Backend DTO needs loginIdentifier, password
+        await this.authService.loginWithPassword(loginIdentifier, password, rememberMe);
       }
 
-      // SUCCESS (for both login and register): Go to the main app
       this.router.navigateByUrl('/tabs/home');
 
     } catch (err) {
       console.error(err);
-      this.showToast('Login failed. Please check your credentials.');
+      this.showToast('Operation failed. Please check your details and try again.');
     } finally {
       loading.dismiss();
     }
   }
 
-  // Helper function to toggle the form mode
-  toggleForm() {
-    this.isRegistering = !this.isRegistering;
-
-    // Toggle the email validator
-    const emailControl = this.loginForm.get('email');
-    if (this.isRegistering) {
-      emailControl?.setValidators([Validators.required, Validators.email]);
-    } else {
-      emailControl?.clearValidators();
-    }
-    emailControl?.updateValueAndValidity();
-  }
-
-  // Helper for showing error messages
   async showToast(message: string) {
     const toast = await this.toastCtrl.create({
       message: message,
       duration: 3000,
-      color: 'danger'
+      color: 'danger',
+      position: 'bottom'
     });
     toast.present();
   }
