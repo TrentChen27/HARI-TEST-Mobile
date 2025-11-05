@@ -1,0 +1,121 @@
+/* Respect global theme */
+ion-content {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 16px;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  --color: var(--ion-text-color);
+}
+
+.login-icon {
+  font-size: 80px;
+  margin-bottom: 16px;
+  color: #059033;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--ion-text-color);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+form {
+  width: 100%;
+  max-width: 400px;
+}
+
+ion-item {
+  --background: var(--ion-item-background);
+  --border-radius: 12px;
+  --color: var(--ion-text-color);
+  --placeholder-color: #888;
+  --border-color: transparent;
+  margin-bottom: 16px;
+}
+
+ion-button[type="submit"] {
+  --background: #059033;
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: bold;
+  height: 48px;
+  margin-top: 24px;
+}
+
+.toggle-link {
+  margin-top: 32px;
+  color: #888;
+  text-align: center;
+}
+
+.toggle-link strong {
+  color: #059033;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.form-helpers {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 12px;
+
+  ion-item {
+    --min-height: 32px;
+    margin-bottom: 0;
+  }
+
+  ion-label {
+    white-space: nowrap;
+    margin-left: 4px;
+  }
+}
+
+.form-helpers ion-checkbox {
+  --size: 14px;
+  --border-radius: 4px;
+  --border-color: #888;
+  --background-checked: #059033;
+  --border-color-checked: #059033;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.forgot-link {
+  color: #059033;
+  text-decoration: none;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  padding-left: 16px;
+  margin-top: -12px;
+  margin-bottom: 12px;
+}

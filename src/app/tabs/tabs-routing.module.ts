@@ -4,33 +4,27 @@ import { TabsPage } from './tabs.page';
 
 const routes: Routes = [
   {
-    path: 'tabs',
+    // 1. The main path is now '', which is what app-routing.module.ts
+    //    expects when it lazy-loads this module.
+    path: '',
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        loadChildren: () => import('../tab1/tab1.module').then(m => m.Tab1PageModule)
+        path: 'home',
+        loadChildren: () => import('../home/home.module').then(m => m.HomePageModule)
       },
       {
-        path: 'tab2',
-        loadChildren: () => import('../tab2/tab2.module').then(m => m.Tab2PageModule)
-      },
-      {
-        path: 'tab3',
-        loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
+        path: 'history',
+        loadChildren: () => import('../history/history.module').then(m => m.HistoryPageModule)
       },
       {
         path: '',
-        redirectTo: '/tabs/tab1',
+        redirectTo: 'home',
         pathMatch: 'full'
       }
     ]
   },
-  {
-    path: '',
-    redirectTo: '/tabs/tab1',
-    pathMatch: 'full'
-  }
+  // We remove the old '/tabs' redirect as it's no longer needed.
 ];
 
 @NgModule({
