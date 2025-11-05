@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      {{ isRegistering ? 'Create Account' : 'Welcome' }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="login-container">
+    <ion-icon name="fitness" color="primary" class="login-icon"></ion-icon>
+    <ion-text color="primary">
+      <h1>Exercise Tracker</h1>
+    </ion-text>
+
+    <!-- Use our Reactive Form group -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+      <!-- Username Input -->
+      <ion-item>
+        <ion-input
+          label="Username"
+          labelPlacement="floating"
+          formControlName="username"
+          [required]="true"
+          autocomplete="username"
+        ></ion-input>
+      </ion-item>
+      <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-message">
+        Username is required.
+      </div>
+
+      <!-- Password Input -->
+      <ion-item>
+        <ion-input
+          label="Password"
+          labelPlacement="floating"
+          formControlName="password"
+          type="password"
+          [required]="true"
+          autocomplete="current-password"
+        ></ion-input>
+      </ion-item>
+      <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+        Password must be at least 6 characters.
+      </div>
+
+      <!-- Email Input (only shown for registration) -->
+      <ion-item *ngIf="isRegistering">
+        <ion-input
+          label="Email"
+          labelPlacement="floating"
+          formControlName="email"
+          type="email"
+          [required]="true"
+        ></ion-input>
+      </ion-item>
+      <div *ngIf="isRegistering && loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+        A valid email is required.
+      </div>
+
+      <!-- Main Submit Button -->
+      <ion-button
+        type="submit"
+        expand="block"
+        class="ion-margin-top"
+        [disabled]="loginForm.invalid">
+        {{ isRegistering ? 'Register' : 'Login' }}
+      </ion-button>
+    </form>
+
+    <!-- Toggle Button -->
+    <ion-button fill="clear" expand="block" (click)="toggleForm()">
+      {{ isRegistering ? 'Already have an account? Login' : 'Need an account? Register' }}
+    </ion-button>
+  </div>
+</ion-content>
