@@ -7,6 +7,7 @@ import { Storage } from '@ionic/storage-angular';
 export class ThemeService {
   private darkMode = false;
 
+  // eslint-disable-next-line @angular-eslint/prefer-inject
   constructor(private storage: Storage) {}
 
   async initStorage() {

@@ -5,17 +5,23 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
 import { ExerciseRecord } from '../home/home.page';
 import { ExerciseReport } from "../models/exercise-report.model";
+import { ConfigService} from "./config.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExerciseService {
-  // --- Injected Services ---
+
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private config = inject(ConfigService);
 
-  // --- API URL from Docs ---
+  // FOR -l -external
+  // private apiUrl = `${this.config.apiUrl}/api/records`;
+
+  // FOR build prod
   private apiUrl = `${environment.apiUrl}/api/records`;
+
 
   constructor() { }
 
