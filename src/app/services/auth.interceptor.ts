@@ -9,12 +9,21 @@ import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
   private authService = inject(AuthService);
+  private config = inject(ConfigService);
+
+  // FOR -l -external
+  // private apiUrl = this.config.apiUrl;
+
+  // FOR build prod
   private apiUrl = environment.apiUrl;
+
+
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
 

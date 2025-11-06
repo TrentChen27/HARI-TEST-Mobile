@@ -7,6 +7,7 @@ import { firstValueFrom, BehaviorSubject, from } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AppUser } from '../models/user.model';
 import { Device } from '@capacitor/device';
+import { ConfigService} from "./config.service";
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +17,12 @@ export class AuthService {
   private storage = inject(Storage);
   private platform = inject(Platform);
   private router = inject(Router);
+  private config = inject(ConfigService);
 
-  // This still points to /api/users, which is correct
+  // FOR -l -external
+  // private apiUrl = `${this.config.apiUrl}/api/users`;
+
+  // FOR build prod
   private apiUrl = `${environment.apiUrl}/api/users`;
 
   private currentUser = new BehaviorSubject<AppUser | null>(null);
