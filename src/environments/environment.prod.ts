@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  apiUrl: 'https://freida-wiry-jasiah.ngrok-free.dev'
 };
