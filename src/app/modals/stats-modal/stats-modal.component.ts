@@ -33,7 +33,20 @@ export class StatsModalComponent implements OnInit {
 
   get formattedDateRange(): string {
     if (!this.reportData) return '';
-    return `${this.reportData.startDate} - ${this.reportData.endDate}`;
+
+    const startDate = new Date(this.reportData.startDate);
+    const endDate = new Date(this.reportData.endDate);
+
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    };
+
+    const formattedStart = startDate.toLocaleDateString('en-US', options);
+    const formattedEnd = endDate.toLocaleDateString('en-US', options);
+
+    return `${formattedStart} - ${formattedEnd}`;
   }
 
   async ngOnInit() {
@@ -76,5 +89,17 @@ export class StatsModalComponent implements OnInit {
 
   dismiss() {
     this.modalCtrl.dismiss();
+  }
+
+  get formattedStartDate(): string {
+    if (!this.reportData) return '';
+    const date = new Date(this.reportData.startDate);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  get formattedEndDate(): string {
+    if (!this.reportData) return '';
+    const date = new Date(this.reportData.endDate);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 }

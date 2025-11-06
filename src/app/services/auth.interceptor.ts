@@ -9,45 +9,41 @@ import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
-import { ConfigService } from './config.service';
+// For build -l -external
+// import { ConfigService } from './config.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
   private authService = inject(AuthService);
-  private config = inject(ConfigService);
-
-  // FOR -l -external
-  // private apiUrl = this.config.apiUrl;
+  // private config = inject(ConfigService);
 
   // FOR build prod
   private apiUrl = environment.apiUrl;
 
-
-
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
 
-    // Only intercept requests to our own API
     if (request.url.startsWith(this.apiUrl)) {
-
-      // Use switchMap to get the token asynchronously
       return this.authService.getToken().pipe(
         switchMap(token => {
+          // Clone the request and add the ngrok header first
+          let reqWithHeaders = request.clone({
+            setHeaders: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          });
+
           if (token) {
-            // If we have a token, clone the request and add the auth header
-            request = request.clone({
+            reqWithHeaders = reqWithHeaders.clone({
               setHeaders: {
                 Authorization: `Bearer ${token}`
               }
             });
           }
-          // Send the new (or original) request
-          return next.handle(request);
+          return next.handle(reqWithHeaders);
         })
       );
     }
-
-    // For all other requests (e.g., to other domains), let them pass
     return next.handle(request);
   }
 }
