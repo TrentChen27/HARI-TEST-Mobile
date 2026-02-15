@@ -191,22 +191,6 @@ Configuration files:
 - `ionic.config.json` - Ionic settings
 - `angular.json` - Angular build configuration
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is private and proprietary.
-
 ## Acknowledgments
 
 Built with the [Ionic Framework](https://ionicframework.com/)
-
-## Support
-
-For issues and questions, please open an issue in the GitHub repository.
