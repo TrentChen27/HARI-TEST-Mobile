@@ -182,7 +182,7 @@ The build artifacts will be stored in the `www/` directory.
 ## Configuration
 
 - **App Name**: Exercise Daily
-- **App ID**: io.ionic.starter
+- **App ID**: io.ionic.starter _(Note: Should be customized for production)_
 - **Web Directory**: www/
 - **Android Scheme**: http
 
@@ -203,9 +203,9 @@ Configuration files:
 
 This project is private and proprietary.
 
-## Author
+## Acknowledgments
 
-Ionic Framework
+Built with the [Ionic Framework](https://ionicframework.com/)
 
 ## Support
 
